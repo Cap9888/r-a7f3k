@@ -12,7 +12,10 @@
     .meta { color: #666; font-size: 0.85rem; margin-bottom: 16px; }
     .summary { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
     .badge { padding: 6px 14px; border-radius: 20px; color: #fff;
-              font-weight: 600; font-size: 0.85rem; }
+              font-weight: 600; font-size: 0.85rem; cursor: pointer;
+              opacity: 0.85; transition: opacity .15s, box-shadow .15s; }
+    .badge:hover { opacity: 1; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
+    .badge.active { opacity: 1; box-shadow: 0 0 0 3px #fff, 0 0 0 5px currentColor; outline: 3px solid rgba(255,255,255,.6); }
     table.dataTable thead th { background: #1e293b; color: #fff; }
     table.dataTable tbody tr:hover { background: #eef2ff !important; }
     .pill { display: inline-block; padding: 2px 10px; border-radius: 12px;
@@ -49,13 +52,13 @@
 </head>
 <body>
   <h1>Swedish Stock Screener</h1>
-  <p class="meta">Generated 2026-06-02 20:49 UTC &nbsp;|&nbsp; 493 stocks scored</p>
+  <p class="meta">Generated 2026-06-02 20:53 UTC &nbsp;|&nbsp; 493 stocks scored</p>
 
   <div class="summary">
-    <span class="badge" style="background:#1a7f3c">Strong Buy: 80</span>
-    <span class="badge" style="background:#4caf50">Buy: 227</span>
-    <span class="badge" style="background:#f0a500">Watch: 141</span>
-    <span class="badge" style="background:#d32f2f">Avoid: 45</span>
+    <span class="badge" style="background:#1a7f3c" data-rating="Strong Buy" title="Click to filter">Strong Buy: 80</span>
+    <span class="badge" style="background:#4caf50" data-rating="Buy" title="Click to filter">Buy: 227</span>
+    <span class="badge" style="background:#f0a500" data-rating="Watch" title="Click to filter">Watch: 141</span>
+    <span class="badge" style="background:#d32f2f" data-rating="Avoid" title="Click to filter">Avoid: 45</span>
     
   </div>
 
@@ -2074,6 +2077,23 @@
         } else {
           row.child('<div class="detail-wrap">' + tpl.innerHTML + '</div>').show();
           $(this).find('td.dt-control').text('▼');
+        }
+      });
+
+      // Badge filter — click to filter by rating, click again to clear
+      var activeRating = null;
+      $('.badge').on('click', function() {
+        var rating = $(this).data('rating');
+        if (activeRating === rating) {
+          // clear filter
+          activeRating = null;
+          table.column(4).search('').draw();
+          $('.badge').removeClass('active');
+        } else {
+          activeRating = rating;
+          table.column(4).search('^' + rating + '$', true, false).draw();
+          $('.badge').removeClass('active');
+          $(this).addClass('active');
         }
       });
     });
